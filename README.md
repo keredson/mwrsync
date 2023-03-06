@@ -9,7 +9,11 @@ Install
 pip install mwrsync
 ```
 
-On your device, [enable WebREPL](https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html?highlight=webrepl#webrepl-a-prompt-over-wifi) by running `import webrepl_setup`.
+On your device, [enable WebREPL](https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html?highlight=webrepl#webrepl-a-prompt-over-wifi) by running `import webrepl_setup` or adding this to your `boot.py`:
+```
+import webrepl
+webrepl.start(password='secret')
+```
 
 Usage
 -----
@@ -31,6 +35,8 @@ Sent 5 of 5 bytes
 Ignoring Files
 --------------
 Add a file `.mwrsyncignore` to the directory you're syncing.  It follows `.gitignore` syntax.  It will neither copy or delete files that match.
+
+**WARNING:** If you set up WebREPL with `import webrepl_setup`, don't forget to add `webrepl_cfg.py` to `.mwrsyncignore` (or copy it to your project directory). Otherwise you'll disable WebREPL on your next reset.
 
 Speed
 -----
