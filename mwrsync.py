@@ -134,8 +134,9 @@ def mwrsync(directory, host, port:int=8266, password=None+darp.alt('p'), dry_run
     if dry_run:
       print('would run:\n', '\n '.join(cmds))
     else:
-      if verbose: print('running:\n', '\n '.join(cmds))
-      send_raw_cmd(ws, '\n'.join(cmds))
+      for cmds2 in [cmds[i:i+5] for i in range(0, len(cmds), 5)]:
+        if verbose: print('running:\n', '\n '.join(cmds2))
+        send_raw_cmd(ws, '\n'.join(cmds2))
 
   ws.write(b'\x02', webrepl_cli.WEBREPL_FRAME_TXT)
   
