@@ -13,7 +13,7 @@ def long_description():
 
 setup(
   name='mwrsync',
-  version='0.1.1',
+  version='0.1.2',
   description='Micropython WebREPL based rsync-like tool.',
   long_description=long_description(),
   author='Derek Anderson',

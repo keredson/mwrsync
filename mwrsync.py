@@ -64,6 +64,10 @@ def _mwrsync_hash_files_remote(ws):
   send_raw_cmd(ws, 'del _mwrsync_hash_files')
   return hashes
 
+def _enter_raw(ws):
+  ws.write(b'\r\x01', webrepl_cli.WEBREPL_FRAME_TXT)
+  read_until(ws, b'exit\r\n>')
+
 def mwrsync(directory, host, port:int=8266, password=None+darp.alt('p'), dry_run:bool=False, verbose:bool=False+darp.alt('v')):
 
   if not os.path.isdir(directory):
@@ -91,8 +95,8 @@ def mwrsync(directory, host, port:int=8266, password=None+darp.alt('p'), dry_run
   if verbose:
     print("Remote WebREPL version:", webrepl_cli.get_ver(ws))
 
-  ws.write(b'\r\x01', webrepl_cli.WEBREPL_FRAME_TXT)
-  read_until(ws, b'exit\r\n>')
+  ws.write(b'\r\x03', webrepl_cli.WEBREPL_FRAME_TXT)
+  _enter_raw(ws)
   
   ignore_fn = directory+'.mwrsyncignore'
   if os.path.isfile(ignore_fn):
@@ -100,7 +104,7 @@ def mwrsync(directory, host, port:int=8266, password=None+darp.alt('p'), dry_run
   else:
     ignore = lambda fn: False
 
-  send_raw_cmd(ws, 'import json, os')
+  send_raw_cmd(ws, 'import json, os, machine')
 
   local = {k[len(directory):]:v for k,v in _mwrsync_hash_files(directory).items()}
   if '.mwrsyncignore' in local:
@@ -138,6 +142,7 @@ def mwrsync(directory, host, port:int=8266, password=None+darp.alt('p'), dry_run
         if verbose: print('running:\n', '\n '.join(cmds2))
         send_raw_cmd(ws, '\n'.join(cmds2))
 
+  # exit raw
   ws.write(b'\x02', webrepl_cli.WEBREPL_FRAME_TXT)
   
   if to_copy and dry_run: print('would copy:')
@@ -147,6 +152,9 @@ def mwrsync(directory, host, port:int=8266, password=None+darp.alt('p'), dry_run
     else:
       if verbose: print('copying:', fn)
       webrepl_cli.put_file(ws, directory+fn, fn)
+
+  # reboot
+  ws.write(b'\x04', webrepl_cli.WEBREPL_FRAME_TXT)
   
 
 if __name__=='__main__':
